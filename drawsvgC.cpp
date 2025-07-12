@@ -1,12 +1,12 @@
 ﻿//drawsvgC.exe
-//Remote Desktop Environment Maintenance Tools
-//This software changes the RDP port number in the registry to the argument value and restarts. Please use it with caution.
-//The purpose and implementation procedures of this software will be explained in readme.md.
+//This is a sample program that draws an SVG file in a window using C++Direct2D.
+//When you drop an SVG file onto the window, it will be rendered using Direct2D. SwapChain is used.
+//Direct2D may not render correctly due to unsupported SVG elements and attributes.
 //
 
 //svgファイルをC++Direct2DでWindowに描画するサンプルプログラムです。
-//Window上にSVGファイルをドロップするとDirect2Dによって描画します。また、SwapChainを使用しています。
-//Direct2DではサポートされていないSVG要素と属性があるので正確に描画しない場合があります。
+//Window上にSVGファイルをドロップするとDirect2Dによって描画します。SwapChainを使用しています。
+//Direct2Dは、未サポートのSVG要素と属性があるので正確に描画しない場合があります。
 
 //(c)2025 teamwind japan n.hayashi
 
@@ -38,35 +38,8 @@ ComPtr<ID2D1SvgDocument> svgDocument;
 ComPtr<IDXGISwapChain1> swapChain;
 ComPtr<ID2D1Bitmap1> d2dTarget;
 
-// 関数宣言
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-bool InitD2D(HWND hwnd);
-bool LoadSvgFile(const wchar_t* filename);
-void Render();
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
-
-    WNDCLASS wc = {};
-    wc.lpfnWndProc = WndProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = L"DrawSvgD2DWindowClass";
-    RegisterClass(&wc);
-
-    g_hwnd = CreateWindowEx(0, wc.lpszClassName, L"Direct2D SVG Draw Sample",
-                            WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-                            g_width, g_height, nullptr, nullptr, hInstance, nullptr);
-    if (!g_hwnd) return -1;
-
-    ShowWindow(g_hwnd, nCmdShow);
-
-    MSG msg = {};
-    while (GetMessage(&msg, nullptr, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-    return 0;
-}
-
+//init d2d and swap chain
 bool InitD2D(HWND hwnd) {  
 
     // D2D Factory 
@@ -79,8 +52,10 @@ bool InitD2D(HWND hwnd) {
     );  
 
     // WICImagingFactory  
-    CoInitialize(nullptr);  
-    CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory));  
+    if(FAILED(CoInitialize(nullptr)))
+        return false;
+    if(FAILED(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory))))
+		return false;  
 
     // D3D11 Device  
     ComPtr<ID3D11Device> d3dDevice;  
@@ -126,7 +101,13 @@ bool InitD2D(HWND hwnd) {
     return true;  
 }
 
+// Load an SVG file into the D2D context
 bool LoadSvgFile(const wchar_t* filename) {
+
+    if (svgDocument) {
+		svgDocument.Reset();
+    }
+
     ComPtr<IWICStream> stream;
     if (FAILED(wicFactory->CreateStream(&stream))) return false;
     if (FAILED(stream->InitializeFromFilename(filename, GENERIC_READ))) return false;
@@ -135,6 +116,7 @@ bool LoadSvgFile(const wchar_t* filename) {
     return SUCCEEDED(d2dContext->CreateSvgDocument(stream.Get(), size, &svgDocument));
 }
 
+// Render the SVG document
 void Render() {
     d2dContext->BeginDraw();
     d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::White));
@@ -148,8 +130,7 @@ void Render() {
     swapChain->Present(1, 0);
 }
 
-
-//<---------------------check ext 
+//drop file listener 
 bool checkExtention(const std::wstring& filename, const std::wstring& extension) {
     if (filename.size() >= extension.size() &&
         filename.compare(filename.size() - extension.size(), extension.size(), extension) == 0) {
@@ -186,14 +167,7 @@ void listenDropFile(HWND hWnd, WPARAM wParam)
     DragFinish(hdrop);
 }
 
-
-
-
-
-
-
-
-
+// Window procedure
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
 		case WM_PAINT:
@@ -215,3 +189,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     }
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
+
+    WNDCLASS wc = {};
+    wc.lpfnWndProc = WndProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = L"DrawSvgD2DWindowClass";
+    RegisterClass(&wc);
+
+    g_hwnd = CreateWindowEx(0, wc.lpszClassName, L"Direct2D SVG Draw Sample",
+                            WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+                            g_width, g_height, nullptr, nullptr, hInstance, nullptr);
+    if (!g_hwnd) return -1;
+
+    ShowWindow(g_hwnd, nCmdShow);
+
+    MSG msg = {};
+    while (GetMessage(&msg, nullptr, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return 0;
+}
+
