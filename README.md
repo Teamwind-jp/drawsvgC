@@ -12,9 +12,9 @@ Direct2DのSVG描画は、一部の機能しかサポートされていませんが、簡単なSVGならば描画
 
 ![drawsvgC](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC.jpg)  
 
-![drawsvgC1](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC1.jpg)  
-
 ![drawsvgC2](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC2.jpg)  
+
+![drawsvgC3](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC3.jpg)  
 
 
 # Requirement
