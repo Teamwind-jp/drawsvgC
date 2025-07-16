@@ -8,7 +8,14 @@ Direct2D's SVG drawing only supports some features, but simple SVG can be drawn.
 本ソフトは、SVGデータをWindowに描画するサンプルです。
 C++でDirect2Dを使用して描画しています。
 自作ソフトでEMOJIを描画するために作成しました。
-Direct2DのSVG描画は、一部の機能しかサポートされていませんが、簡単なSVGならば描画できます。
+Direct2DのSVG描画は、一部の機能しかサポートされていませんが、簡単なSVGならば描画できます。  
+
+![drawsvgC](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC.jpg)  
+
+![drawsvgC1](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC1.jpg)  
+
+![drawsvgC2](http://teamwind.serveblog.net/github/drawsvgC/drawsvgC2.jpg)  
+
 
 # Requirement
 
